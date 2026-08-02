@@ -123,6 +123,26 @@ export async function getPrintTemplatePropValues(
     ((doc.grandTotal as Money) ?? (doc.amount as Money)).float
   );
 
+  if (totalTax && totalTax.float) {
+    (values.doc as PrintTemplateData).taxAmountInWords = getGrandTotalInWords(
+      totalTax.float
+    );
+    (values.doc as PrintTemplateData).totalTax = doc.fyo.format(
+      totalTax,
+      ModelNameEnum.Currency
+    );
+  }
+
+  if (Array.isArray(doc.items)) {
+    const totalQty = doc.items.reduce(
+      (sum, item: any) => sum + (parseFloat(item.qty) || 0),
+      0
+    );
+    (values.doc as PrintTemplateData).totalQty = totalQty.toFixed(2);
+  } else {
+    (values.doc as PrintTemplateData).totalQty = '0.00';
+  }
+
   (values.doc as PrintTemplateData).date = getDate(doc.date as string);
 
   if (printSettings.displayTime) {
