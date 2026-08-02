@@ -20,15 +20,18 @@
       style="height: 700px"
     >
       <!-- Welcome to SAAN Billing Software -->
-      <div class="px-4 py-4">
-        <h1 class="text-2xl font-semibold select-none dark:text-gray-25">
-          {{ t`Welcome to SAAN Billing Software` }}
-        </h1>
-        <p class="text-gray-600 dark:text-gray-400 text-base select-none">
-          {{
-            t`Create a new company or select an existing one from your computer`
-          }}
-        </p>
+      <div class="px-4 py-4 flex items-center space-x-3">
+        <img src="../assets/logo.png" alt="SAAN Billing Logo" class="w-10 h-10 rounded-md object-cover" />
+        <div>
+          <h1 class="text-2xl font-semibold select-none dark:text-gray-25">
+            {{ t`Welcome to SAAN Billing Software` }}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 text-base select-none">
+            {{
+              t`Create a new company or select an existing one from your computer`
+            }}
+          </p>
+        </div>
       </div>
 
       <hr class="dark:border-gray-800" />
