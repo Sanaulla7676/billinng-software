@@ -1,10 +1,10 @@
 {
-  "name": "frappe-books",
+  "name": "saan-billing-software",
   "version": "0.37.0",
-  "description": "Simple book-keeping app for everyone",
+  "description": "SAAN Billing Software - Simple book-keeping and billing app",
   "author": {
-    "name": "Frappe Technologies Pvt. Ltd.",
-    "email": "hello@frappe.io"
+    "name": "SAAN",
+    "email": "hello@saan.io"
   },
   "scripts": {
     "dev": "node build/scripts/dev.mjs",
@@ -91,9 +91,9 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "homepage": "https://frappe.io/books",
+  "homepage": "https://github.com/Sanaulla7676/billinng-software",
   "repository": {
-    "url": "https://github.com/frappe/books"
+    "url": "https://github.com/Sanaulla7676/billinng-software"
   },
   "license": "AGPL-3.0-only"
 }
