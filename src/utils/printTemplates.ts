@@ -28,6 +28,8 @@ type TemplateUpdateItem = {
   height: number;
 };
 
+import { codeStateMap } from 'regional/in';
+
 const printSettingsFields = [
   'logo',
   'displayLogo',
@@ -40,8 +42,53 @@ const printSettingsFields = [
   'amountInWords',
   'displaytermsandconditions',
   'termsAndConditions',
+  'bankName',
+  'accountNo',
+  'ifscCode',
 ];
-const accountingSettingsFields = ['gstin', 'taxId'];
+const accountingSettingsFields = ['gstin', 'taxId', 'stateName', 'stateCode'];
+
+export function getStateNameAndCode(
+  gstin?: string,
+  stateName?: string,
+  address?: string
+): { stateName: string; stateCode: string } {
+  let code = '';
+  let name = '';
+
+  if (gstin && typeof gstin === 'string' && gstin.trim().length >= 2) {
+    const potentialCode = gstin.trim().substring(0, 2);
+    if (codeStateMap[potentialCode]) {
+      code = potentialCode;
+      name = codeStateMap[potentialCode];
+    }
+  }
+
+  if (!name && stateName && typeof stateName === 'string' && stateName.trim()) {
+    name = stateName.trim();
+    const foundCode = Object.keys(codeStateMap).find(
+      (c) => codeStateMap[c].toLowerCase() === name.toLowerCase()
+    );
+    if (foundCode) {
+      code = foundCode;
+    }
+  }
+
+  if (!name && address && typeof address === 'string') {
+    for (const [c, sName] of Object.entries(codeStateMap)) {
+      if (address.toLowerCase().includes(sName.toLowerCase())) {
+        name = sName;
+        code = c;
+        break;
+      }
+    }
+  }
+
+  return {
+    stateName: name || 'Karnataka',
+    stateCode: code || '29',
+  };
+}
 
 export async function getPrintTemplatePropValues(
   doc: Doc
@@ -112,6 +159,34 @@ export async function getPrintTemplatePropValues(
     ...printValues,
     ...accountingValues,
   };
+
+  const sellerStateInfo = getStateNameAndCode(
+    values.print.gstin as string,
+    values.print.stateName as string,
+    (values.print.address || (values.print.links && (values.print.links as any).address && (values.print.links as any).address.addressDisplay)) as string
+  );
+  values.print.stateName = sellerStateInfo.stateName;
+  values.print.stateCode = sellerStateInfo.stateCode;
+
+  const partyGSTIN = (values.doc.partyGSTIN || (values.doc.links && (values.doc.links as any).party && (values.doc.links as any).party.gstin) || '') as string;
+  const partyState = (values.doc.partyState || (values.doc.links && (values.doc.links as any).party && (values.doc.links as any).party.links && (values.doc.links as any).party.links.address && (values.doc.links as any).party.links.address.state) || '') as string;
+  const partyAddress = (values.doc.partyAddress || (values.doc.links && (values.doc.links as any).party && (values.doc.links as any).party.links && (values.doc.links as any).party.links.address && (values.doc.links as any).party.links.address.addressDisplay) || '') as string;
+
+  const partyStateInfo = getStateNameAndCode(partyGSTIN, partyState, partyAddress);
+  if (!values.doc.partyState) (values.doc as PrintTemplateData).partyState = partyStateInfo.stateName;
+  if (!values.doc.partyStateCode) (values.doc as PrintTemplateData).partyStateCode = partyStateInfo.stateCode;
+
+  const shippingGSTIN = (values.doc.consigneeGSTIN || partyGSTIN) as string;
+  const shippingState = (values.doc.shippingState || partyState) as string;
+  const shippingAddress = (values.doc.shippingAddress || partyAddress) as string;
+
+  const shippingStateInfo = getStateNameAndCode(shippingGSTIN, shippingState, shippingAddress);
+  if (!values.doc.shippingState) (values.doc as PrintTemplateData).shippingState = shippingStateInfo.stateName;
+  if (!values.doc.shippingStateCode) (values.doc as PrintTemplateData).shippingStateCode = shippingStateInfo.stateCode;
+
+  if (!values.doc.placeOfSupply) (values.doc as PrintTemplateData).placeOfSupply = partyStateInfo.stateName;
+  if (!values.doc.placeOfSupplyCode) (values.doc as PrintTemplateData).placeOfSupplyCode = partyStateInfo.stateCode;
+
   const discountSchema = ['Invoice', 'Quote'];
   if (discountSchema.some((value) => doc.schemaName?.endsWith(value))) {
     (values.doc as PrintTemplateData).totalDiscount =

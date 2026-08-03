@@ -9,8 +9,20 @@
 
 **Modern Accounting & Billing Made Simple**
 
+<br/>
+
+<a href="https://github.com/Sanaulla7676/billinng-software/releases/latest">
+  <img src="https://img.shields.io/badge/⬇️_DIRECT_DOWNLOAD-Windows_Installer_(.exe)-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Direct Download for Windows" height="50"/>
+</a>
+
+<br/><br/>
+
+👉 [**Click Here to Download Latest SAAN Billing Software for Windows (.exe)**](https://github.com/Sanaulla7676/billinng-software/releases/latest)
+
+<br/>
+
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/Sanaulla7676/billinng-software)](https://github.com/Sanaulla7676/billinng-software/releases)
-![Platforms](https://img.shields.io/badge/platform-mac%2C%20windows%2C%20linux-yellowgreen)
+![Platforms](https://img.shields.io/badge/platform-windows%2C%20mac%2C%20linux-yellowgreen)
 
 </div>
 
