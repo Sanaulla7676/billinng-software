@@ -1,291 +1,82 @@
-<main class="bg-white text-black p-4 text-xs font-sans leading-snug" :style="{ 'font-family': print.font || 'Arial, sans-serif' }">
-  <!-- Outer Box Container -->
-  <div class="border border-black w-full mx-auto my-0 bg-white" style="box-sizing: border-box; font-size: 11px; color: #000; border-collapse: collapse;">
-    
-    <!-- Top Header Title -->
-    <div class="text-center font-bold text-sm py-1 border-b border-black uppercase tracking-wider bg-white">
-      Tax Invoice
-    </div>
-
-    <!-- Company Info & Invoice Metadata Section -->
-    <table class="w-full border-collapse border-b border-black" style="table-layout: fixed; font-size: 10px;">
-      <tbody>
-        <tr>
-          <!-- Left Column: Seller / Company Details (55% width) -->
-          <td class="w-7/12 align-top p-2 border-r border-black" style="vertical-align: top;">
-            <div class="font-bold text-sm uppercase text-black mb-1">
-              {{ print.companyName }}
-            </div>
-            <div v-if="print.address || (print.links && print.links.address)" class="whitespace-pre-line text-black mb-2 leading-tight">
-              {{ print.address || (print.links && print.links.address && print.links.address.addressDisplay) }}
-            </div>
-            <div class="font-semibold text-2xs">
-              <span class="font-bold">GSTIN/UIN :</span> {{ print.gstin || '' }}
-            </div>
-            <div class="font-semibold text-2xs">
-              <span class="font-bold">State Name :</span> {{ print.stateName || 'Karnataka' }}, <span class="font-bold">Code :</span> {{ print.stateCode || '29' }}
-            </div>
-          </td>
-
-          <!-- Right Column: Invoice Info Grid (45% width) -->
-          <td class="w-5/12 align-top p-0" style="vertical-align: top;">
-            <table class="w-full border-collapse" style="font-size: 10px;">
-              <tbody>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Invoice No.</div>
-                    <div class="font-bold text-xs">{{ doc.name }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Dated</div>
-                    <div class="font-bold text-xs">{{ doc.date }}</div>
-                  </td>
-                </tr>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Delivery Note</div>
-                    <div class="font-semibold text-2xs">{{ doc.deliveryNote || '' }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Mode/Terms of Payment</div>
-                    <div class="font-semibold text-2xs">{{ doc.paymentTerms || doc.terms || '' }}</div>
-                  </td>
-                </tr>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Reference No. & Date.</div>
-                    <div class="font-semibold text-2xs">{{ doc.referenceNo || '' }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Other References</div>
-                    <div class="font-semibold text-2xs">{{ doc.otherReferences || '' }}</div>
-                  </td>
-                </tr>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Buyer's Order No.</div>
-                    <div class="font-semibold text-2xs">{{ doc.poNo || '' }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Dated</div>
-                    <div class="font-semibold text-2xs">{{ doc.poDate || '' }}</div>
-                  </td>
-                </tr>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Dispatch Doc No.</div>
-                    <div class="font-semibold text-2xs">{{ doc.dispatchDocNo || '' }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Delivery Note Date</div>
-                    <div class="font-semibold text-2xs">{{ doc.deliveryNoteDate || '' }}</div>
-                  </td>
-                </tr>
-                <tr class="border-b border-black">
-                  <td class="p-1 border-r border-black w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Dispatched through</div>
-                    <div class="font-semibold text-2xs">{{ doc.dispatchedThrough || '' }}</div>
-                  </td>
-                  <td class="p-1 w-1/2 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Destination</div>
-                    <div class="font-semibold text-2xs">{{ doc.destination || '' }}</div>
-                  </td>
-                </tr>
-                <tr>
-                  <td colspan="2" class="p-1 align-top">
-                    <div class="text-black text-3xs uppercase font-normal">Terms of Delivery</div>
-                    <div class="font-semibold text-2xs">{{ doc.termsOfDelivery || '' }}</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Consignee & Buyer Address Section -->
-    <table class="w-full border-collapse border-b border-black" style="table-layout: fixed; font-size: 10px;">
-      <tbody>
-        <tr class="border-b border-black">
-          <td class="w-full align-top p-2" style="vertical-align: top;">
-            <div class="text-3xs uppercase text-black font-normal mb-0.5" style="text-decoration: underline;">Consignee (Ship to)</div>
-            <div class="font-bold text-xs uppercase text-black">
-              {{ doc.shippingParty || doc.party }}
-            </div>
-            <div v-if="doc.shippingAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address)" class="text-black leading-tight my-1">
-              {{ doc.shippingAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.addressDisplay) }}
-            </div>
-            <div class="text-2xs">
-              <span class="font-bold">State Name :</span> {{ doc.shippingState || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.state) || 'Karnataka' }}, 
-              <span class="font-bold">Code :</span> {{ doc.shippingStateCode || '29' }}
-            </div>
-            <div class="text-2xs">
-              <span class="font-bold">GST NO. :</span> {{ doc.consigneeGSTIN || doc.partyGSTIN || (doc.links && doc.links.party && doc.links.party.gstin) || '' }}
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td class="w-full align-top p-2" style="vertical-align: top;">
-            <div class="text-3xs uppercase text-black font-normal mb-0.5" style="text-decoration: underline;">Buyer (Bill to)</div>
-            <div class="font-bold text-xs uppercase text-black">
-              {{ doc.party }}
-            </div>
-            <div v-if="doc.partyAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address)" class="text-black leading-tight my-1">
-              {{ doc.partyAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.addressDisplay) }}
-            </div>
-            <div class="text-2xs">
-              <span class="font-bold">State Name :</span> {{ doc.partyState || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.state) || 'Karnataka' }}, 
-              <span class="font-bold">Code :</span> {{ doc.partyStateCode || '29' }}
-            </div>
-            <div class="text-2xs">
-              <span class="font-bold">GST NO. :</span> {{ doc.partyGSTIN || (doc.links && doc.links.party && doc.links.party.gstin) || '' }}
-            </div>
-            <div class="text-2xs">
-              <span class="font-bold">Place of Supply :</span> {{ doc.placeOfSupply || doc.partyState || 'Karnataka' }}, 
-              <span class="font-bold">Code :</span> {{ doc.placeOfSupplyCode || doc.partyStateCode || '29' }}
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Main Items Table -->
-    <table class="w-full border-collapse border-b border-black text-center" style="table-layout: fixed; font-size: 10px;">
-      <thead>
-        <tr class="border-b border-black font-bold text-black bg-white" style="height: 24px;">
-          <th class="border-r border-black p-1 w-10 text-center">Sl No.</th>
-          <th class="border-r border-black p-1 text-left">Description of Goods</th>
-          <th class="border-r border-black p-1 w-24 text-center">HSN/SAC</th>
-          <th class="border-r border-black p-1 w-24 text-right">Quantity</th>
-          <th class="border-r border-black p-1 w-24 text-right">Rate</th>
-          <th class="p-1 w-28 text-right">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Item Rows -->
-        <tr v-for="(row, idx) in doc.items" :key="row.name || idx" class="align-top">
-          <td class="border-r border-black p-1 text-center align-top">{{ idx + 1 }}</td>
-          <td class="border-r border-black p-1 text-left align-top font-bold">
-            <div>{{ row.item }}</div>
-            <div v-if="doc.description && row.description" class="text-2xs text-black font-normal mt-0.5">
-              {{ row.description }}
-            </div>
-          </td>
-          <td class="border-r border-black p-1 text-center align-top">{{ row.hsnCode || '' }}</td>
-          <td class="border-r border-black p-1 text-right align-top whitespace-nowrap">
-            <span class="font-bold">{{ row.qty }}</span> {{ row.transferUnit || row.unit || 'Nos' }}
-          </td>
-          <td class="border-r border-black p-1 text-right align-top whitespace-nowrap">{{ row.rate }}</td>
-          <td class="p-1 text-right align-top font-semibold whitespace-nowrap">{{ row.amount }}</td>
-        </tr>
-
-        <!-- Tax Breakdown Rows inside Items Table -->
-        <tr v-for="tax in doc.taxes" :key="tax.name" class="align-top font-semibold text-black">
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right italic pr-4">{{ tax.account }}</td>
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right"></td>
-          <td class="border-r border-black p-1 text-right"></td>
-          <td class="p-1 text-right font-bold whitespace-nowrap">{{ tax.amount }}</td>
-        </tr>
-
-        <!-- Total Summary Row -->
-        <tr class="border-t border-black font-bold bg-white" style="height: 24px;">
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right pr-4 uppercase">Total</td>
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right whitespace-nowrap">{{ doc.totalQty || '' }} Nos</td>
-          <td class="border-r border-black p-1 text-right"></td>
-          <td class="p-1 text-right font-bold text-xs whitespace-nowrap">{{ doc.grandTotal }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Amount Chargeable in Words -->
-    <div class="p-1.5 border-b border-black flex justify-between items-center text-xs">
-      <div>
-        <span class="text-3xs uppercase text-black font-normal block">Amount Chargeable (in words)</span>
-        <span class="font-bold uppercase">INR {{ doc.grandTotalInWords }}</span>
+<style>
+@page { size: A4; margin: 8mm; }
+* { box-sizing: border-box; }
+body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif; font-size: 9px; }
+.invoice { width: 100%; border: 1px solid #000; border-collapse: collapse; }
+.invoice table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.invoice td, .invoice th { border: 1px solid #000; padding: 3px 4px; vertical-align: top; }
+.invoice .title { font-size: 13px; font-weight: 700; text-align: center; padding: 4px; }
+.invoice .seller { width: 55%; }
+.invoice .meta { width: 45%; }
+.invoice .label { font-size: 7px; font-weight: 400; }
+.invoice .value { font-weight: 600; }
+.invoice .bold { font-weight: 700; }
+.invoice .center { text-align: center; }
+.invoice .right { text-align: right; }
+.invoice .left { text-align: left; }
+.invoice .tiny { font-size: 7px; }
+.invoice .items th { text-align: center; font-weight: 700; height: 23px; }
+.invoice .items .sl { width: 7%; }
+.invoice .items .desc { width: 34%; }
+.invoice .items .hsn { width: 13%; }
+.invoice .items .qty { width: 15%; }
+.invoice .items .rate { width: 14%; }
+.invoice .items .amount { width: 17%; }
+.invoice .words { padding: 5px; }
+.invoice .summary th { text-align: center; font-weight: 700; }
+.invoice .summary td { font-size: 8px; }
+.invoice .footer td { height: 74px; }
+.invoice .signature { text-align: right; vertical-align: bottom; font-weight: 700; }
+.invoice .nowrap { white-space: nowrap; }
+</style>
+<div class="invoice" :style="{ fontFamily: print.font || 'Arial, sans-serif' }">
+  <div class="title">Tax Invoice</div>
+  <table><tr>
+    <td class="seller" style="border-left:0;border-top:0;">
+      <div class="bold" style="font-size:11px;">{{ print.companyName }}</div>
+      <div v-if="print.address || (print.links && print.links.address)" style="white-space:pre-line;line-height:1.15;margin-top:2px;">{{ print.address || (print.links && print.links.address && print.links.address.addressDisplay) }}</div>
+      <div><span class="bold">GSTIN/UIN :</span> {{ print.gstin || '' }}</div>
+      <div><span class="bold">State Name :</span> {{ print.stateName || 'Karnataka' }}, <span class="bold">Code :</span> {{ print.stateCode || '29' }}</div>
+      <div style="border-top:1px solid #000;margin:4px -4px 0;padding:4px 4px 0;">
+        <div style="text-decoration:underline;">Consignee (Ship to)</div><div class="bold">{{ doc.shippingParty || doc.party }}</div>
+        <div v-if="doc.shippingAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address)" style="white-space:pre-line;line-height:1.15;">{{ doc.shippingAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.addressDisplay) }}</div>
+        <div><span class="bold">State Name :</span> {{ doc.shippingState || doc.partyState || 'Karnataka' }}, <span class="bold">Code :</span> {{ doc.shippingStateCode || doc.partyStateCode || '29' }}</div>
+        <div><span class="bold">PHONE :</span> {{ doc.shippingPhone || doc.phone || '' }}</div><div><span class="bold">GST NO. :</span> {{ doc.consigneeGSTIN || doc.partyGSTIN || '' }}</div>
       </div>
-      <div class="font-bold text-3xs">E. & O.E</div>
-    </div>
-
-    <!-- HSN/SAC Tax Summary Table -->
-    <table class="w-full border-collapse border-b border-black text-center" style="table-layout: fixed; font-size: 9px;">
-      <thead>
-        <tr class="border-b border-black font-bold bg-white">
-          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">HSN/SAC</th>
-          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">Taxable Value</th>
-          <th colspan="2" class="border-r border-black p-1 align-middle">Integrated Tax</th>
-          <th rowspan="2" class="p-1 align-middle w-28">Total Tax Amount</th>
-        </tr>
-        <tr class="border-b border-black font-bold bg-white">
-          <th class="border-r border-black p-1 align-middle w-20">Rate</th>
-          <th class="border-r border-black p-1 align-middle w-24">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="tax in (doc.taxes && doc.taxes.length ? doc.taxes : [{ account: 'IGST Output', amount: doc.subTotal }])" :key="tax.name" class="border-b border-black">
-          <td class="border-r border-black p-1 text-center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '85258900' }}</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
-          <td class="border-r border-black p-1 text-center">{{ tax.rate || '18%' }}</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ tax.amount || '' }}</td>
-          <td class="p-1 text-right pr-2 font-semibold">{{ tax.amount || '' }}</td>
-        </tr>
-        <tr class="font-bold bg-white">
-          <td class="border-r border-black p-1 text-right pr-2">Total</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
-          <td class="p-1 text-right pr-2 font-bold">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Tax Amount in Words -->
-    <div class="p-1.5 border-b border-black text-xs">
-      <span class="text-3xs uppercase text-black font-normal">Tax Amount (in words) : </span>
-      <span class="font-bold uppercase">INR {{ doc.taxAmountInWords || doc.grandTotalInWords }}</span>
-    </div>
-
-    <!-- Footer: Declaration, Bank Details & Signature -->
-    <table class="w-full border-collapse" style="table-layout: fixed; font-size: 10px;">
-      <tbody>
-        <tr>
-          <!-- Declaration Box -->
-          <td class="w-1/2 border-r border-black p-2 align-top" style="vertical-align: top;">
-            <div class="font-bold text-2xs uppercase mb-1" style="text-decoration: underline;">Declaration</div>
-            <div class="text-3xs text-black leading-tight">
-              We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
-            </div>
-          </td>
-
-          <!-- Company's Bank Details & Signature -->
-          <td class="w-1/2 p-2 align-top" style="vertical-align: top;">
-            <div class="mb-4">
-              <div class="font-bold text-2xs uppercase mb-1" style="text-decoration: underline;">Company's Bank Details</div>
-              <div class="text-3xs leading-tight">
-                <div><span class="font-semibold">Bank Name :</span> {{ print.bankName || 'Federal Bank' }}</div>
-                <div><span class="font-semibold">A/c No. :</span> {{ print.accountNo || '16850200003457' }}</div>
-                <div><span class="font-semibold">Branch & IFS Code :</span> {{ print.ifscCode || 'Gangavathi & FDRL0001605' }}</div>
-              </div>
-            </div>
-            
-            <div class="text-right mt-6">
-              <div class="font-bold text-2xs">for {{ print.companyName }}</div>
-              <div style="height: 45px;"></div>
-              <div class="font-bold text-3xs uppercase pt-1 inline-block">Authorised Signatory</div>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Bottom Center Note -->
-    <div class="text-center text-3xs italic py-1 border-t border-black bg-white">
-      This is a Computer Generated Invoice
-    </div>
-
-  </div>
-</main>
+      <div style="border-top:1px solid #000;margin:4px -4px 0;padding:4px 4px 0;">
+        <div style="text-decoration:underline;">Buyer (Bill to)</div><div class="bold">{{ doc.party }}</div>
+        <div v-if="doc.partyAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address)" style="white-space:pre-line;line-height:1.15;">{{ doc.partyAddress || (doc.links && doc.links.party && doc.links.party.links && doc.links.party.links.address && doc.links.party.links.address.addressDisplay) }}</div>
+        <div><span class="bold">State Name :</span> {{ doc.partyState || 'Karnataka' }}, <span class="bold">Code :</span> {{ doc.partyStateCode || '29' }}</div>
+        <div><span class="bold">PHONE :</span> {{ doc.phone || '' }}</div><div><span class="bold">GST NO. :</span> {{ doc.partyGSTIN || '' }}</div>
+        <div><span class="bold">Place of Supply :</span> {{ doc.placeOfSupply || doc.partyState || 'Karnataka' }}, <span class="bold">Code :</span> {{ doc.placeOfSupplyCode || doc.partyStateCode || '29' }}</div>
+      </div>
+    </td>
+    <td class="meta" style="padding:0;border-right:0;border-top:0;">
+      <table>
+        <tr><td><span class="label">Invoice No.</span><br><span class="value">{{ doc.name }}</span></td><td><span class="label">Dated</span><br><span class="value">{{ doc.date }}</span></td></tr>
+        <tr><td><span class="label">Delivery Note</span><br>{{ doc.deliveryNote || '' }}</td><td><span class="label">Mode/Terms of Payment</span><br>{{ doc.paymentTerms || doc.terms || '' }}</td></tr>
+        <tr><td><span class="label">Reference No. & Date.</span><br>{{ doc.referenceNo || '' }}</td><td><span class="label">Other References</span><br>{{ doc.otherReferences || '' }}</td></tr>
+        <tr><td><span class="label">Buyer's Order No.</span><br>{{ doc.poNo || '' }}</td><td><span class="label">Dated</span><br>{{ doc.poDate || '' }}</td></tr>
+        <tr><td><span class="label">Dispatch Doc No.</span><br>{{ doc.dispatchDocNo || '' }}</td><td><span class="label">Delivery Note Date</span><br>{{ doc.deliveryNoteDate || '' }}</td></tr>
+        <tr><td><span class="label">Dispatched through</span><br>{{ doc.dispatchedThrough || '' }}</td><td><span class="label">Destination</span><br>{{ doc.destination || '' }}</td></tr>
+        <tr><td colspan="2"><span class="label">Terms of Delivery</span><br>{{ doc.termsOfDelivery || '' }}</td></tr>
+      </table>
+    </td>
+  </tr></table>
+  <table class="items"><thead><tr><th class="sl">Sl<br>No.</th><th class="desc">Description of Goods</th><th class="hsn">HSN/SAC</th><th class="qty">Quantity</th><th class="rate">Rate</th><th class="amount">Amount</th></tr></thead>
+  <tbody>
+    <tr v-for="(row, idx) in doc.items" :key="row.name || idx"><td class="center">{{ idx + 1 }}</td><td class="left"><span class="bold">{{ row.item }}</span><div v-if="doc.description && row.description" class="tiny">{{ row.description }}</div></td><td class="center">{{ row.hsnCode || '' }}</td><td class="right nowrap"><span class="bold">{{ row.qty }}</span> {{ row.transferUnit || row.unit || 'Nos' }}</td><td class="right nowrap">{{ row.rate }}</td><td class="right nowrap bold">{{ row.amount }}</td></tr>
+    <tr v-for="tax in doc.taxes" :key="tax.name"><td></td><td class="right"><span class="bold">{{ tax.account }}</span></td><td></td><td></td><td></td><td class="right bold nowrap">{{ tax.amount }}</td></tr>
+    <tr><td></td><td class="right bold">Total</td><td></td><td class="right bold nowrap">{{ doc.totalQty || '' }} Nos</td><td></td><td class="right bold nowrap">{{ doc.grandTotal }}</td></tr>
+  </tbody></table>
+  <div class="words" style="border-bottom:1px solid #000;"><span class="tiny">Amount Chargeable (in words)</span><br><span class="bold">INR {{ doc.grandTotalInWords }}</span><span class="bold" style="float:right;font-size:7px;">E. & O.E</span></div>
+  <table class="summary"><thead><tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Integrated Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr><tr><th>Rate</th><th>Amount</th></tr></thead>
+  <tbody>
+    <tr v-for="tax in doc.taxes" :key="tax.name"><td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td class="center">{{ tax.rate || '' }}</td><td class="right">{{ tax.amount }}</td><td class="right">{{ tax.amount }}</td></tr>
+    <tr v-if="!doc.taxes || !doc.taxes.length"><td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td></td><td></td><td></td></tr>
+    <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
+  </tbody></table>
+  <div style="padding:4px;border-bottom:1px solid #000;"><span class="tiny">Tax Amount (in words) : </span><span class="bold">INR {{ doc.taxAmountInWords || '' }}</span></div>
+  <table class="footer"><tr><td style="width:50%;"><div class="bold" style="text-decoration:underline;">Declaration</div><div class="tiny" style="margin-top:3px;">We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</div></td><td style="width:50%;"><div class="bold" style="text-decoration:underline;">Company's Bank Details</div><div class="tiny">Bank Name : <span class="bold">{{ print.bankName || '' }}</span></div><div class="tiny">A/c No. : <span class="bold">{{ print.accountNo || '' }}</span></div><div class="tiny">Branch & IFS Code : <span class="bold">{{ print.ifscCode || '' }}</span></div><div class="signature">for {{ print.companyName }}<br><br>Authorised Signatory</div></td></tr></table>
+  <div class="center tiny" style="padding:3px;">This is a Computer Generated Invoice</div>
+</div>
