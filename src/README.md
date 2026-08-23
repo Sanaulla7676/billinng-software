@@ -1,24 +1,17 @@
-# src
+# Core Billing Architecture
 
-This is where all the frontend code lives
+The application uses an offline-first Electron/Vue/TypeScript architecture. New accounting features should be implemented as domain services first and connected to Vue pages through the existing router/state layer.
 
-## Fyo Initialization
+## Transaction invariants
 
-The initialization flows are different when the instance is new or is existing.
-All of them are triggered from `src/App.vue`.
+Every posted sales transaction must:
 
-**New Instance**
+1. Create a unique invoice number.
+2. Calculate line amounts, discounts and GST deterministically.
+3. Update customer receivable when the sale is on credit.
+4. Update cash/bank when paid immediately.
+5. Reduce stock for stock-tracked items.
+6. Post balanced accounting entries.
+7. Preserve the original transaction after posting; corrections use cancellation/return flows rather than destructive edits.
 
-1. Run _Setup Wizard_ for init values (eg: `country`).
-2. Call `setupInstance.ts/setupInstance` using init values.
-
-**Existing Instance**
-
-1. Connect to db.
-2. Check if _Setup Wizard_ has been completed, if not, jump to **New Instance**
-3. Call `initFyo/initializeInstance` with `dbPath` and `countryCode`
-
-## Global Fyo
-
-Global fyo is exported from `initFyo.ts`. Only code that isn't going to be unit
-tested using `mocha` should use this, i.e. code in `src`
+Every purchase transaction follows the corresponding opposite inventory/accounting flow.
