@@ -22,17 +22,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm install
 
-      - name: Build Windows x64 installer
+      - name: Build Windows x64 installer (no publish)
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: npm run build -- --win --x64 --publish never --nosign
 
-      - name: Verify Windows artifacts
+      - name: Verify Windows installer
         shell: pwsh
         run: |
           $files = Get-ChildItem -Path dist_electron/bundled -Recurse -File | Where-Object { $_.Extension -in '.exe', '.blockmap', '.yml' }
@@ -42,23 +41,19 @@ jobs:
           }
           $files | Select-Object FullName, Length
 
-      - name: Create or update v0.38.0 release
+      - name: Create or update GitHub release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $version = 'v0.38.0'
-          $assets = Get-ChildItem -Path dist_electron/bundled -Recurse -File | Where-Object { $_.Extension -eq '.exe' }
-          if ($assets.Count -eq 0) {
-            Write-Error 'No .exe installer was found.'
-            exit 1
-          }
+          $version = node -p "require('./package.json').version"
+          $tag = "v$version"
+          $title = "SAAN Billing Software v$version"
 
-          gh release view $version --repo $env:GITHUB_REPOSITORY 2>$null
+          gh release view $tag | Out-Null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $version --repo $env:GITHUB_REPOSITORY --title 'v0.38.0 - SAAN Billing Software' --notes 'Current Windows release built from main.'
-          }
-
-          foreach ($asset in $assets) {
-            gh release upload $version $asset.FullName --repo $env:GITHUB_REPOSITORY --clobber
+            gh release create $tag dist_electron/bundled/*.exe dist_electron/bundled/*.blockmap dist_electron/bundled/latest.yml --title $title --notes "Windows release for SAAN Billing Software v$version" --latest
+          } else {
+            gh release upload $tag dist_electron/bundled/*.exe dist_electron/bundled/*.blockmap dist_electron/bundled/latest.yml --clobber
+            gh release edit $tag --title $title --latest
           }
