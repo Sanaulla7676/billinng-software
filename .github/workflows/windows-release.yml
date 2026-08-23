@@ -3,8 +3,8 @@ name: Windows Release
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -24,11 +24,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Windows installer and publish release
+      - name: Build Windows installer
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run build -- --win --x64 --publish always --nosign
+        run: npm run build -- --win --x64 --publish never --nosign
 
       - name: Verify Windows artifacts
         shell: pwsh
@@ -39,3 +38,21 @@ jobs:
             exit 1
           }
           $files | Select-Object FullName, Length
+
+      - name: Create or update latest release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+            gh release delete-asset latest "SAAN Billing Software-v${{ github.run_number }}-windows-x64.exe" --yes 2>/dev/null || true
+          else
+            gh release create latest --title "SAAN Billing Software - Latest" --notes "Latest verified Windows build from main." --latest
+          fi
+
+      - name: Publish Windows installer assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload latest dist_electron/bundled/*.exe dist_electron/bundled/*.yml dist_electron/bundled/*.blockmap --clobber
