@@ -1,23 +1,34 @@
-# Billing Software Build Status
+# Build Status
 
-## Repository
-`Sanaulla7676/billinng-software`
+## Billing System Upgrade
 
-## Completed in this pass
-- Added `TALLY_FEATURE_PARITY_SPEC.md` with the requested end-to-end Tally-style workflow and feature scope.
-- Added `TALLY_FEATURE_PARITY_CHECKLIST.md` with an implementation checklist.
-- Existing Parcel-Perfect-style tax invoice template remains part of the print layer.
+This repository is being upgraded from a basic billing/accounting application toward a full small-business ERP workflow inspired by the functional scope of TallyPrime, with original implementation and UI.
 
-## Current repository architecture
-The repository is an existing Electron/TypeScript application with backend, build, FYO/models, and print-template infrastructure. It is not a blank web application.
+### Current implementation target
+- Company setup and business profile
+- Customer and supplier masters
+- Product/item masters
+- Sales invoices
+- Purchase invoices
+- Receipts and payments
+- Double-entry accounting
+- Customer/supplier outstanding balances
+- Inventory stock movements
+- GST calculation and invoice presentation
+- Parcel-Perfect print layout
+- Reports and dashboards
+- Backup/restore and data import/export
 
-## Important scope constraint
-A 100% clone of Tally's proprietary software/code/UI is not an appropriate implementation target. The product target is feature/workflow parity implemented with original code and an original interface, plus the requested Parcel-Perfect-style invoice output.
+### Build order
+1. Core masters and company configuration
+2. Sales/purchase transaction engine
+3. Accounting postings and balances
+4. Inventory engine
+5. GST and compliance layer
+6. Printing/PDF engine
+7. Reports
+8. Security, backup and administration
+9. Advanced inventory, banking, payroll and manufacturing modules
 
-## Deployment status
-Vercel is not the correct deployment target for this repository as-is because it is an Electron desktop application rather than a conventional Vercel web app. Vercel deployment therefore was not completed in this pass.
-
-## Recommended build targets
-1. Desktop application: build Electron installers for Windows/macOS/Linux using the repository's existing Electron build configuration.
-2. Optional web edition: create a separate web frontend/API deployment if browser access is required.
-3. Keep database/business logic shared where practical, but do not force the desktop Electron app onto Vercel.
+### Important
+Feature parity is being implemented incrementally and must be validated with automated tests and real transaction scenarios. This file is a status document, not a claim that all TallyPrime features are already implemented.
