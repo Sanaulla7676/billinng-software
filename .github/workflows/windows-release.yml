@@ -1,0 +1,42 @@
+name: Windows Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows installer
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build -- --win --x64 --publish always --nosign
+
+      - name: Verify Windows artifacts
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem -Path dist_electron/bundled -Recurse -File | Where-Object { $_.Extension -in '.exe', '.blockmap', '.yml' }
+          if ($files.Count -eq 0) {
+            Write-Error 'No Windows release artifacts were produced.'
+            exit 1
+          }
+          $files | Select-Object FullName, Length
