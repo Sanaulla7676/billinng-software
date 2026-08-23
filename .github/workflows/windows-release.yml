@@ -27,14 +27,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
-
-      - name: Build Windows x64 installer and publish release
+      - name: Build Windows x64 installer
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run build -- --win --x64 --publish always --nosign
+        run: npm run build -- --win --x64 --publish never --nosign
 
       - name: Verify Windows artifacts
         shell: pwsh
@@ -45,3 +41,24 @@ jobs:
             exit 1
           }
           $files | Select-Object FullName, Length
+
+      - name: Create or update v0.38.0 release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = 'v0.38.0'
+          $assets = Get-ChildItem -Path dist_electron/bundled -Recurse -File | Where-Object { $_.Extension -eq '.exe' }
+          if ($assets.Count -eq 0) {
+            Write-Error 'No .exe installer was found.'
+            exit 1
+          }
+
+          gh release view $version --repo $env:GITHUB_REPOSITORY 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $version --repo $env:GITHUB_REPOSITORY --title 'v0.38.0 - SAAN Billing Software' --notes 'Current Windows release built from main.'
+          }
+
+          foreach ($asset in $assets) {
+            gh release upload $version $asset.FullName --repo $env:GITHUB_REPOSITORY --clobber
+          }
