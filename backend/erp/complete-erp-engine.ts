@@ -1,0 +1,31 @@
+export type Id = string;
+export type TaxMode = 'intra' | 'inter' | 'exempt';
+export type VoucherType = 'sale' | 'purchase' | 'receipt' | 'payment' | 'journal' | 'sales-return' | 'purchase-return';
+export interface Company { id: Id; name: string; gstin?: string; stateCode: string; currency: string; financialYearStart: string; }
+export interface Party { id: Id; name: string; type: 'customer' | 'supplier'; gstin?: string; stateCode?: string; creditLimit?: number; creditDays?: number; openingBalance?: number; }
+export interface Item { id: Id; name: string; sku?: string; hsn?: string; unit: string; saleRate: number; purchaseRate: number; gstRate: number; reorderLevel?: number; trackBatch?: boolean; trackExpiry?: boolean; }
+export interface VoucherLine { account: Id; debit: number; credit: number; description?: string; }
+export interface StockMovement { id: Id; itemId: Id; locationId: Id; quantity: number; direction: 'in' | 'out'; unitRate: number; voucherId: Id; batchNo?: string; expiry?: string; }
+export interface InvoiceLine { itemId: Id; description: string; qty: number; rate: number; discount: number; gstRate: number; hsn?: string; }
+export interface InvoiceTotals { subtotal: number; discount: number; taxable: number; cgst: number; sgst: number; igst: number; tax: number; roundOff: number; grandTotal: number; }
+const money = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+const positive = (n: number, field: string) => { if (!Number.isFinite(n) || n < 0) throw new Error(`${field} must be a non-negative number`); };
+export function calculateInvoice(lines: InvoiceLine[], mode: TaxMode): InvoiceTotals {
+ let subtotal=0, discount=0, taxable=0, cgst=0, sgst=0, igst=0;
+ for (const line of lines) { positive(line.qty,'Quantity'); positive(line.rate,'Rate'); positive(line.discount,'Discount'); positive(line.gstRate,'GST rate'); const gross=money(line.qty*line.rate); const disc=money(Math.min(line.discount,gross)); const base=money(gross-disc); const tax=money(base*line.gstRate/100); subtotal=money(subtotal+gross); discount=money(discount+disc); taxable=money(taxable+base); if(mode==='intra'){cgst=money(cgst+tax/2);sgst=money(sgst+tax/2);} else if(mode==='inter') igst=money(igst+tax); }
+ const tax=money(cgst+sgst+igst); const beforeRound=money(taxable+tax); const grandTotal=money(Math.round(beforeRound)); return {subtotal,discount,taxable,cgst,sgst,igst,tax,roundOff:money(grandTotal-beforeRound),grandTotal};
+}
+export function validateBalanced(lines: VoucherLine[]): void { const debit=money(lines.reduce((s,x)=>s+x.debit,0)); const credit=money(lines.reduce((s,x)=>s+x.credit,0)); if(debit!==credit) throw new Error(`Unbalanced voucher: debit ${debit} != credit ${credit}`); }
+export class AccountingBook { private entries=new Map<Id,VoucherLine[]>(); post(id:Id,lines:VoucherLine[]){validateBalanced(lines);if(this.entries.has(id))throw new Error(`Voucher ${id} already posted`);this.entries.set(id,lines);} cancel(id:Id,reversalId:Id){const lines=this.entries.get(id);if(!lines)throw new Error(`Voucher ${id} not found`);this.post(reversalId,lines.map(x=>({...x,debit:x.credit,credit:x.debit})));} balance(account:Id){let v=0;for(const lines of this.entries.values())for(const x of lines)if(x.account===account)v+=x.debit-x.credit;return money(v);} all(){return [...this.entries.entries()].map(([id,lines])=>({id,lines}));} }
+export class InventoryBook { private movements:StockMovement[]=[]; add(m:StockMovement){if(!Number.isFinite(m.quantity)||m.quantity<=0)throw new Error('Stock quantity must be positive');this.movements.push(m);} quantity(itemId:Id,locationId?:Id){return this.movements.filter(m=>m.itemId===itemId&&(!locationId||m.locationId===locationId)).reduce((s,m)=>s+(m.direction==='in'?m.quantity:-m.quantity),0);} assertAvailable(itemId:Id,qty:number,locationId?:Id){if(this.quantity(itemId,locationId)<qty)throw new Error(`Insufficient stock for ${itemId}`);} movementsFor(itemId:Id){return this.movements.filter(m=>m.itemId===itemId);} }
+export interface Outstanding { partyId:Id; invoiceId:Id; invoiceNumber:string; date:string; dueDate?:string; debit:number; credit:number; }
+export class OutstandingBook { private rows:Outstanding[]=[]; add(row:Outstanding){this.rows.push(row);} balance(partyId:Id){return money(this.rows.filter(x=>x.partyId===partyId).reduce((s,x)=>s+x.debit-x.credit,0));} ageing(partyId:Id,asOf:string){const end=new Date(asOf).getTime();return this.rows.filter(x=>x.partyId===partyId).map(x=>({...x,days:x.dueDate?Math.max(0,Math.floor((end-new Date(x.dueDate).getTime())/86400000)):0}));} }
+export interface AuditEvent { id:Id; at:string; userId:Id; action:string; entity:string; entityId:Id; before?:unknown; after?:unknown; }
+export class AuditLog { private events:AuditEvent[]=[]; record(e:AuditEvent){this.events.push(e);} list(entity?:string){return entity?this.events.filter(x=>x.entity===entity):[...this.events];} }
+export interface User { id:Id; name:string; role:'owner'|'admin'|'manager'|'staff'|'viewer'; active:boolean; }
+export const permissions:Record<User['role'],string[]>={owner:['*'],admin:['company','masters','sales','purchase','inventory','accounting','gst','banking','reports','users','backup'],manager:['masters','sales','purchase','inventory','accounting','gst','reports'],staff:['masters','sales','purchase'],viewer:['reports']};
+export function can(user:User,permission:string){return user.active&&(permissions[user.role].includes('*')||permissions[user.role].includes(permission));}
+export interface ReportRow { account:Id; debit:number; credit:number; balance:number; }
+export function trialBalance(book:AccountingBook):ReportRow[]{const map=new Map<Id,{debit:number;credit:number}>();for(const {lines} of book.all())for(const l of lines){const r=map.get(l.account)??{debit:0,credit:0};r.debit+=l.debit;r.credit+=l.credit;map.set(l.account,r);}return [...map].map(([account,x])=>({account,debit:money(x.debit),credit:money(x.credit),balance:money(x.debit-x.credit)}));}
+export function validateInvoiceNumber(number:string){if(!/^[A-Za-z0-9][A-Za-z0-9\/-]{0,49}$/.test(number))throw new Error('Invalid invoice number');}
+export function validateGstin(gstin?:string){if(gstin&&!/^[0-9]{2}[A-Z0-9]{13}$/.test(gstin.toUpperCase()))throw new Error('Invalid GSTIN format');}
