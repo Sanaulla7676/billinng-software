@@ -290,10 +290,13 @@ const invoiceTemplate = String.raw`<style>
       <tr>
         <td class="left-party-pane">
           <div class="seller-details">
-            <span class="party-name">{{ print.companyName }}</span>
-            <div v-if="print.address || (print.links && print.links.address)" style="white-space:pre-line;">{{ print.address || (print.links && print.links.address && print.links.address.addressDisplay) }}</div>
-            GSTIN/UIN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: {{ print.gstin || '' }}<br>
-            State Name &nbsp;&nbsp;&nbsp;&nbsp;: {{ print.stateName || '' }}, Code : {{ print.stateCode || '' }}
+            <span class="party-name">GLOBAL TECHNOLOGIES</span>
+            <div style="white-space:pre-line;">4-9-214/4-9-174, 1; MURHARI
+NAGAR 509 ; 5TH CROSS ROAD ,
+GANGAVATHI, Gangawati, Koppal,
+Karnataka, 583227</div>
+            GSTIN/UIN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: 29CIYPB6495E1ZK<br>
+            State Name &nbsp;&nbsp;&nbsp;&nbsp;: Karnataka, Code : 29
           </div>
 
           <div class="consignee-details">
@@ -441,6 +444,78 @@ const invoiceTemplate = String.raw`<style>
       <span class="words-value">INR {{ doc.grandTotalInWords }}</span>
     </div>
 
+    <table class="tax-table" v-if="doc.hasIGST">
+      <thead>
+        <tr>
+          <th rowspan="2" style="width: 33%;">HSN/SAC</th>
+          <th rowspan="2" style="width: 25%;">Taxable<br>Value</th>
+          <th colspan="2" style="width: 25%;">Integrated Tax</th>
+          <th rowspan="2" style="width: 17%;">Total<br>Tax Amount</th>
+        </tr>
+        <tr>
+          <th style="width: 10%;">Rate</th>
+          <th style="width: 15%;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td style="text-align: right;">{{ doc.subTotal || doc.netTotal }}</td>
+          <td style="text-align: center;">{{ doc.igstTax ? doc.igstTax.rate + '%' : '' }}</td>
+          <td style="text-align: right;">{{ doc.igstTax ? doc.igstTax.amount : '' }}</td>
+          <td style="text-align: right;">{{ doc.totalTax || '' }}</td>
+        </tr>
+        <tr class="tax-table-total">
+          <td style="text-align: right; padding-right: 10px;">Total:</td>
+          <td style="text-align: right;">{{ doc.subTotal || doc.netTotal }}</td>
+          <td></td>
+          <td style="text-align: right;">{{ doc.totalTax || '' }}</td>
+          <td style="text-align: right;">{{ doc.totalTax || '' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="tax-table" v-else>
+      <thead>
+        <tr>
+          <th rowspan="2" style="width: 25%;">HSN/SAC</th>
+          <th rowspan="2" style="width: 20%;">Taxable<br>Value</th>
+          <th colspan="2" style="width: 20%;">Central Tax</th>
+          <th colspan="2" style="width: 20%;">State Tax</th>
+          <th rowspan="2" style="width: 15%;">Total<br>Tax Amount</th>
+        </tr>
+        <tr>
+          <th>Rate</th>
+          <th>Amount</th>
+          <th>Rate</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td></td>
+          <td style="text-align: right;">{{ doc.subTotal || doc.netTotal }}</td>
+          <td style="text-align: center;">{{ doc.cgstTax ? doc.cgstTax.rate + '%' : '' }}</td>
+          <td style="text-align: right;">{{ doc.cgstTax ? doc.cgstTax.amount : '' }}</td>
+          <td style="text-align: center;">{{ doc.sgstTax ? doc.sgstTax.rate + '%' : '' }}</td>
+          <td style="text-align: right;">{{ doc.sgstTax ? doc.sgstTax.amount : '' }}</td>
+          <td style="text-align: right;">{{ doc.totalTax || '' }}</td>
+        </tr>
+        <tr class="tax-table-total">
+          <td style="text-align: right; padding-right: 10px;">Total:</td>
+          <td style="text-align: right;">{{ doc.subTotal || doc.netTotal }}</td>
+          <td></td>
+          <td style="text-align: right;">{{ doc.cgstTax ? doc.cgstTax.amount : '' }}</td>
+          <td></td>
+          <td style="text-align: right;">{{ doc.sgstTax ? doc.sgstTax.amount : '' }}</td>
+          <td style="text-align: right;">{{ doc.totalTax || '' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tax-words-container">
+      Tax Amount (in words) : &nbsp;&nbsp;<strong>INR {{ doc.taxAmountInWords || '' }}</strong>
+    </div>
 
     <table class="footer-grid">
       <tr>
@@ -456,20 +531,20 @@ const invoiceTemplate = String.raw`<style>
             <table class="bank-table" style="width: 100%; font-size: 8.5px; margin-top: 2px;">
               <tr>
                 <td style="width: 32%;">Bank Name</td>
-                <td>: &nbsp;<strong>{{ print.bankName || '' }}</strong></td>
+                <td>: &nbsp;<strong>Federal Bank</strong></td>
               </tr>
               <tr>
                 <td>A/c No.</td>
-                <td>: &nbsp;<strong>{{ print.accountNo || '' }}</strong></td>
+                <td>: &nbsp;<strong>16850200003457</strong></td>
               </tr>
               <tr>
                 <td>Branch & IFS Code</td>
-                <td>: &nbsp;<strong>{{ print.ifscCode || '' }}</strong></td>
+                <td>: &nbsp;<strong>Gangavathi & FDRL0001685</strong></td>
               </tr>
             </table>
           </div>
           <div class="sign-off-box">
-            <span class="sign-off-title">for {{ print.companyName }}</span>
+            <span class="sign-off-title">for GLOBAL TECHNOLOGIES</span>
             <span class="sign-off-bottom">Authorised Signatory</span>
           </div>
         </td>

@@ -14,16 +14,19 @@
           <!-- Left Column: Seller / Company Details (55% width) -->
           <td class="w-7/12 align-top p-2 border-r border-black" style="vertical-align: top;">
             <div class="font-bold text-sm uppercase text-black mb-1">
-              {{ print.companyName }}
+              GLOBAL TECHNOLOGIES
             </div>
-            <div v-if="print.address || (print.links && print.links.address)" class="whitespace-pre-line text-black mb-2 leading-tight">
-              {{ print.address || (print.links && print.links.address && print.links.address.addressDisplay) }}
+            <div class="whitespace-pre-line text-black mb-2 leading-tight">
+              4-9-214/4-9-174, 1; MURHARI
+NAGAR 509 ; 5TH CROSS ROAD ,
+GANGAVATHI, Gangawati, Koppal,
+Karnataka, 583227
             </div>
             <div class="font-semibold text-2xs">
-              <span class="font-bold">GSTIN/UIN :</span> {{ print.gstin || '' }}
+              <span class="font-bold">GSTIN/UIN :</span> 29CIYPB6495E1ZK
             </div>
             <div class="font-semibold text-2xs">
-              <span class="font-bold">State Name :</span> {{ print.stateName || 'Karnataka' }}, <span class="font-bold">Code :</span> {{ print.stateCode || '29' }}
+              <span class="font-bold">State Name :</span> Karnataka, <span class="font-bold">Code :</span> 29
             </div>
           </td>
 
@@ -211,6 +214,43 @@
       <div class="font-bold text-3xs">E. & O.E</div>
     </div>
 
+    <!-- HSN/SAC Tax Summary Table -->
+    <table class="w-full border-collapse border-b border-black text-center" style="table-layout: fixed; font-size: 9px;">
+      <thead>
+        <tr class="border-b border-black font-bold bg-white">
+          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">HSN/SAC</th>
+          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">Taxable Value</th>
+          <th colspan="2" class="border-r border-black p-1 align-middle">Integrated Tax</th>
+          <th rowspan="2" class="p-1 align-middle w-28">Total Tax Amount</th>
+        </tr>
+        <tr class="border-b border-black font-bold bg-white">
+          <th class="border-r border-black p-1 align-middle w-20">Rate</th>
+          <th class="border-r border-black p-1 align-middle w-24">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="tax in (doc.taxes && doc.taxes.length ? doc.taxes : [{ account: 'IGST Output', amount: doc.subTotal }])" :key="tax.name" class="border-b border-black">
+          <td class="border-r border-black p-1 text-center"></td>
+          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
+          <td class="border-r border-black p-1 text-center">{{ tax.rate || '18%' }}</td>
+          <td class="border-r border-black p-1 text-right pr-2">{{ tax.amount || '' }}</td>
+          <td class="p-1 text-right pr-2 font-semibold">{{ tax.amount || '' }}</td>
+        </tr>
+        <tr class="font-bold bg-white">
+          <td class="border-r border-black p-1 text-right pr-2">Total</td>
+          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
+          <td class="border-r border-black p-1 text-center"></td>
+          <td class="border-r border-black p-1 text-right pr-2">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
+          <td class="p-1 text-right pr-2 font-bold">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tax Amount in Words -->
+    <div class="p-1.5 border-b border-black text-xs">
+      <span class="text-3xs uppercase text-black font-normal">Tax Amount (in words) : </span>
+      <span class="font-bold uppercase">INR {{ doc.taxAmountInWords || doc.grandTotalInWords }}</span>
+    </div>
 
     <!-- Footer: Declaration, Bank Details & Signature -->
     <table class="w-full border-collapse" style="table-layout: fixed; font-size: 10px;">
@@ -229,14 +269,14 @@
             <div class="mb-4">
               <div class="font-bold text-2xs uppercase mb-1" style="text-decoration: underline;">Company's Bank Details</div>
               <div class="text-3xs leading-tight">
-                <div><span class="font-semibold">Bank Name :</span> {{ print.bankName || 'Federal Bank' }}</div>
-                <div><span class="font-semibold">A/c No. :</span> {{ print.accountNo || '16850200003457' }}</div>
-                <div><span class="font-semibold">Branch & IFS Code :</span> {{ print.ifscCode || 'Gangavathi & FDRL0001605' }}</div>
+                <div><span class="font-semibold">Bank Name :</span> Federal Bank</div>
+                <div><span class="font-semibold">A/c No. :</span> 16850200003457</div>
+                <div><span class="font-semibold">Branch & IFS Code :</span> Gangavathi & FDRL0001685</div>
               </div>
             </div>
             
             <div class="text-right mt-6">
-              <div class="font-bold text-2xs">for {{ print.companyName }}</div>
+              <div class="font-bold text-2xs">for GLOBAL TECHNOLOGIES</div>
               <div style="height: 45px;"></div>
               <div class="font-bold text-3xs uppercase pt-1 inline-block">Authorised Signatory</div>
             </div>

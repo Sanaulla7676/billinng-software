@@ -38,10 +38,13 @@ body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif;
   <table>
     <tr>
       <td class="seller" style="border-left:0;border-top:0;">
-        <div class="bold" style="font-size:11px;">{{ print.companyName }}</div>
-        <div v-if="print.address || (print.links && print.links.address)" style="white-space:pre-line;line-height:1.15;margin-top:2px;">{{ print.address || (print.links && print.links.address && print.links.address.addressDisplay) }}</div>
-        <div><span class="bold">GSTIN/UIN :</span> {{ print.gstin || '' }}</div>
-        <div><span class="bold">State Name :</span> {{ print.stateName || 'Karnataka' }}, <span class="bold">Code :</span> {{ print.stateCode || '29' }}</div>
+        <div class="bold" style="font-size:11px;">GLOBAL TECHNOLOGIES</div>
+        <div style="white-space:pre-line;line-height:1.15;margin-top:2px;">4-9-214/4-9-174, 1; MURHARI
+NAGAR 509 ; 5TH CROSS ROAD ,
+GANGAVATHI, Gangawati, Koppal,
+Karnataka, 583227</div>
+        <div><span class="bold">GSTIN/UIN :</span> 29CIYPB6495E1ZK</div>
+        <div><span class="bold">State Name :</span> Karnataka, <span class="bold">Code :</span> 29</div>
 
         <div style="border-top:1px solid #000;margin:4px -4px 0;padding:4px 4px 0;">
           <div style="text-decoration:underline;">Consignee (Ship to)</div>
@@ -106,6 +109,30 @@ body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif;
   </div>
 
 
+  <table class="summary">
+    <thead>
+      <tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Integrated Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr>
+      <tr><th>Rate</th><th>Amount</th></tr>
+    </thead>
+    <tbody>
+      <tr v-for="tax in doc.taxes" :key="tax.name">
+        <td class="center"></td>
+        <td class="right">{{ doc.subTotal || doc.netTotal }}</td>
+        <td class="center">{{ tax.rate || '' }}</td>
+        <td class="right">{{ tax.amount }}</td>
+        <td class="right">{{ tax.amount }}</td>
+      </tr>
+      <tr v-if="!doc.taxes || !doc.taxes.length">
+        <td class="center"></td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td class="center"></td><td class="right"></td><td class="right"></td>
+      </tr>
+      <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
+    </tbody>
+  </table>
+
+  <div style="padding:4px;border-bottom:1px solid #000;">
+    <span class="tiny">Tax Amount (in words) : </span><span class="bold">INR {{ doc.taxAmountInWords || '' }}</span>
+  </div>
+
   <table class="footer">
     <tr>
       <td style="width:50%;">
@@ -114,10 +141,10 @@ body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif;
       </td>
       <td style="width:50%;">
         <div class="bold" style="text-decoration:underline;">Company's Bank Details</div>
-        <div class="tiny">Bank Name : <span class="bold">{{ print.bankName || '' }}</span></div>
-        <div class="tiny">A/c No. : <span class="bold">{{ print.accountNo || '' }}</span></div>
-        <div class="tiny">Branch & IFS Code : <span class="bold">{{ print.ifscCode || '' }}</span></div>
-        <div class="signature">for {{ print.companyName }}<br><br>Authorised Signatory</div>
+        <div class="tiny">Bank Name : <span class="bold">Federal Bank</span></div>
+        <div class="tiny">A/c No. : <span class="bold">16850200003457</span></div>
+        <div class="tiny">Branch & IFS Code : <span class="bold">Gangavathi & FDRL0001685</span></div>
+        <div class="signature">for GLOBAL TECHNOLOGIES<br><br>Authorised Signatory</div>
       </td>
     </tr>
   </table>
