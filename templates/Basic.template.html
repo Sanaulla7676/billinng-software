@@ -211,43 +211,6 @@
       <div class="font-bold text-3xs">E. & O.E</div>
     </div>
 
-    <!-- HSN/SAC Tax Summary Table -->
-    <table class="w-full border-collapse border-b border-black text-center" style="table-layout: fixed; font-size: 9px;">
-      <thead>
-        <tr class="border-b border-black font-bold bg-white">
-          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">HSN/SAC</th>
-          <th rowspan="2" class="border-r border-black p-1 align-middle w-28">Taxable Value</th>
-          <th colspan="2" class="border-r border-black p-1 align-middle">Integrated Tax</th>
-          <th rowspan="2" class="p-1 align-middle w-28">Total Tax Amount</th>
-        </tr>
-        <tr class="border-b border-black font-bold bg-white">
-          <th class="border-r border-black p-1 align-middle w-20">Rate</th>
-          <th class="border-r border-black p-1 align-middle w-24">Amount</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="tax in (doc.taxes && doc.taxes.length ? doc.taxes : [{ account: 'IGST Output', amount: doc.subTotal }])" :key="tax.name" class="border-b border-black">
-          <td class="border-r border-black p-1 text-center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '85258900' }}</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
-          <td class="border-r border-black p-1 text-center">{{ tax.rate || '18%' }}</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ tax.amount || '' }}</td>
-          <td class="p-1 text-right pr-2 font-semibold">{{ tax.amount || '' }}</td>
-        </tr>
-        <tr class="font-bold bg-white">
-          <td class="border-r border-black p-1 text-right pr-2">Total</td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.subTotal || doc.netTotal }}</td>
-          <td class="border-r border-black p-1 text-center"></td>
-          <td class="border-r border-black p-1 text-right pr-2">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
-          <td class="p-1 text-right pr-2 font-bold">{{ doc.taxes && doc.taxes[0] ? doc.taxes[0].amount : '' }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- Tax Amount in Words -->
-    <div class="p-1.5 border-b border-black text-xs">
-      <span class="text-3xs uppercase text-black font-normal">Tax Amount (in words) : </span>
-      <span class="font-bold uppercase">INR {{ doc.taxAmountInWords || doc.grandTotalInWords }}</span>
-    </div>
 
     <!-- Footer: Declaration, Bank Details & Signature -->
     <table class="w-full border-collapse" style="table-layout: fixed; font-size: 10px;">

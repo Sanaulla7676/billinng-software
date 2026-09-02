@@ -105,29 +105,6 @@ body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif;
     <span class="bold" style="float:right;font-size:7px;">E. & O.E</span>
   </div>
 
-  <table class="summary">
-    <thead>
-      <tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Integrated Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr>
-      <tr><th>Rate</th><th>Amount</th></tr>
-    </thead>
-    <tbody>
-      <tr v-for="tax in doc.taxes" :key="tax.name">
-        <td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td>
-        <td class="right">{{ doc.subTotal || doc.netTotal }}</td>
-        <td class="center">{{ tax.rate || '' }}</td>
-        <td class="right">{{ tax.amount }}</td>
-        <td class="right">{{ tax.amount }}</td>
-      </tr>
-      <tr v-if="!doc.taxes || !doc.taxes.length">
-        <td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td class="center"></td><td class="right"></td><td class="right"></td>
-      </tr>
-      <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
-    </tbody>
-  </table>
-
-  <div style="padding:4px;border-bottom:1px solid #000;">
-    <span class="tiny">Tax Amount (in words) : </span><span class="bold">INR {{ doc.taxAmountInWords || '' }}</span>
-  </div>
 
   <table class="footer">
     <tr>

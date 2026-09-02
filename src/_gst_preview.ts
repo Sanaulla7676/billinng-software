@@ -1,4 +1,8 @@
-<style>
+import { createApp } from 'vue';
+
+// Kept in sync with templates/Tax-Invoice.template.html for quick visual QA
+// in a plain browser (no Electron needed). Not part of the shipped app.
+const invoiceTemplate = String.raw`<style>
 @page { size: A4; margin: 6mm 6mm; }
 .invoice, .invoice * { box-sizing: border-box; }
 .invoice {
@@ -477,3 +481,74 @@
   <div class="computer-generated">This is a Computer Generated Invoice</div>
 
 </div>
+`;
+
+const values = {
+  print: {
+    companyName: 'GLOBAL TECHNOLOGIES',
+    address: '4-9-214/4-9-174, 1; MURHARI\nNAGAR 509 ; 5TH CROSS ROAD ,\nGANGAVATHI, Gangawati, Koppal,\nKarnataka, 583227',
+    gstin: '29CIYPB6495E1ZK',
+    stateName: 'Karnataka',
+    stateCode: '29',
+    bankName: 'Federal Bank',
+    accountNo: '16850200003457',
+    ifscCode: 'Gangavathi & FDRL0001685',
+    font: 'Arial',
+  },
+  doc: {
+    name: '16',
+    date: '05-08-2026',
+    party: 'RUDRA TECH SYSTEMS',
+    partyAddress: 'Flat No. 902, Ridge Towers, Block E, HMT Road\nAsiatic Oxygen, Quthbullapur State : 36\nHyderabad Telangana 500037 India',
+    partyGSTIN: '36HVLPS3793D1ZX',
+    partyState: 'TELANGANA',
+    partyStateCode: '36',
+    placeOfSupply: 'TELANGANA',
+    placeOfSupplyCode: '36',
+    items: [
+      { name: '1', item: 'Junction Box', hsnCode: 8504, qty: '5.00', unit: 'Nos', rate: '350.00', amount: '1,750.00' },
+      { name: '2', item: '2 Core Power Cable', hsnCode: 8544, qty: '100.00', unit: 'Nos', rate: '50.00', amount: '5,000.00' },
+      { name: '3', item: 'Cat 6 Cabel', hsnCode: 8544, qty: '120.00', unit: 'Nos', rate: '32.00', amount: '3,840.00' },
+      { name: '4', item: 'Patch Panel', hsnCode: 8544, qty: '1.00', unit: 'Nos', rate: '1,800.00', amount: '1,800.00' },
+      { name: '5', item: '8 Port Unmanaged Network Switch', hsnCode: 85176290, qty: '1.00', unit: 'Nos', rate: '1,700.00', amount: '1,700.00' },
+      { name: '6', item: 'Cat 6 Patch Cable 1M', hsnCode: 8544, qty: '8.00', unit: 'Nos', rate: '150.00', amount: '1,200.00' },
+      { name: '7', item: 'Keystone', hsnCode: 8544, qty: '8.00', unit: 'Nos', rate: '220.00', amount: '1,760.00' },
+      { name: '8', item: '12V Battery', hsnCode: 85311020, qty: '2.00', unit: 'Nos', rate: '1,480.00', amount: '2,960.00' },
+      { name: '9', item: 'Wired Magnetic Contact', hsnCode: 90318000, qty: '1.00', unit: 'Nos', rate: '150.00', amount: '150.00' },
+      { name: '10', item: 'Grill Gate Magnetic Contact', hsnCode: 90318000, qty: '1.00', unit: 'Nos', rate: '150.00', amount: '150.00' },
+      { name: '11', item: 'Shutter Sensor', hsnCode: 8536, qty: '1.00', unit: 'Nos', rate: '650.00', amount: '650.00' },
+      { name: '12', item: 'Foot Panic', hsnCode: 83024110, qty: '1.00', unit: 'Nos', rate: '850.00', amount: '850.00' },
+      { name: '13', item: 'Wired Panic Switch', hsnCode: 85365090, qty: '5.00', unit: 'Nos', rate: '330.00', amount: '1,650.00' },
+      { name: '14', item: 'Smoke Detector', hsnCode: 85311020, qty: '1.00', unit: 'Nos', rate: '2,000.00', amount: '2,000.00' },
+      { name: '15', item: '8 Core Cable', hsnCode: 8544, qty: '40.00', unit: 'Nos', rate: '104.00', amount: '4,160.00' },
+      { name: '16', item: '4 Core Cable', hsnCode: 8544, qty: '160.00', unit: 'Nos', rate: '54.00', amount: '8,640.00' },
+      { name: '17', item: 'PVC Conduit', hsnCode: 3917, qty: '180.00', unit: 'Nos', rate: '42.00', amount: '7,560.00' },
+      { name: '18', item: 'Door Buzzer', hsnCode: 85311090, qty: '1.00', unit: 'Nos', rate: '2,650.00', amount: '2,650.00' },
+      { name: '19', item: 'Installation and Commissioning', hsnCode: 9987, qty: '1.00', unit: 'Nos', rate: '11,000.00', amount: '11,000.00' },
+      { name: '20', item: 'SD Card 128GB Class 10', hsnCode: 85235290, qty: '5.00', unit: 'Nos', rate: '1,900.00', amount: '9,500.00' },
+      { name: '21', item: '6U Rack Loaded', hsnCode: 83024200, qty: '1.00', unit: 'Nos', rate: '4,800.00', amount: '4,800.00' },
+    ],
+    totalQty: '643.00',
+    grandTotal: '87,048.60',
+    grandTotalInWords: 'Eighty Seven Thousand Forty Eight and Sixty Paise Only',
+    subTotal: '73,770.00',
+    totalTax: '13,278.60',
+    taxAmountInWords: 'Thirteen Thousand Two Hundred Seventy Eight and Sixty Paise Only',
+    taxes: [
+      { name: 'IGST', account: 'IGST', rate: 18, amount: '13,278.60' },
+    ],
+    igstTax: { rate: 18, amount: '13,278.60' },
+    hasIGST: true,
+  },
+};
+
+const app = createApp({
+  components: {
+    Invoice: { template: invoiceTemplate, props: ['doc', 'print'] },
+  },
+  template: `<Invoice :doc="values.doc" :print="values.print" />`,
+  data() {
+    return { values };
+  },
+});
+app.mount('#app');
