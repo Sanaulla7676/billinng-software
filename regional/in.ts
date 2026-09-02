@@ -51,26 +51,44 @@ export function getStateCodeFromGSTIN(gstin?: string): string | undefined {
 }
 
 /**
- * Determines whether a sale/purchase between the company and a party is
- * intra-state (CGST + SGST, family 'GST') or inter-state (IGST, family
- * 'IGST'), based on the state codes embedded in their GSTINs.
- *
- * Returns undefined when either GSTIN is missing/unparseable, i.e. when
- * there isn't enough information to decide - callers should leave the
- * existing tax selection untouched in that case rather than guessing.
+ * Returns the 2-digit GST state code matching a state's name (e.g.
+ * "Karnataka" -> "29"), or undefined if it isn't a recognised state.
+ * Used as a fallback for parties that don't have a GSTIN on file (e.g.
+ * unregistered/consumer buyers) but do have a state set on their address.
  */
-export function resolveGSTTaxFamily(
-  companyGSTIN?: string,
-  partyGSTIN?: string
-): 'GST' | 'IGST' | undefined {
-  const companyCode = getStateCodeFromGSTIN(companyGSTIN);
-  const partyCode = getStateCodeFromGSTIN(partyGSTIN);
-
-  if (!companyCode || !partyCode) {
+export function getStateCodeFromName(stateName?: string): string | undefined {
+  if (!stateName || typeof stateName !== 'string' || !stateName.trim()) {
     return undefined;
   }
 
-  return companyCode === partyCode ? 'GST' : 'IGST';
+  const normalized = stateName.trim().toLowerCase();
+  const match = Object.entries(codeStateMap).find(
+    ([, name]) => name.toLowerCase() === normalized
+  );
+
+  return match?.[0];
+}
+
+/**
+ * Determines whether a sale/purchase between the company and a party is
+ * intra-state (CGST + SGST, family 'GST') or inter-state (IGST, family
+ * 'IGST'), given their 2-digit GST state codes - each resolved from
+ * whichever is available: GSTIN first, falling back to a plain address
+ * state (see getStateCodeFromGSTIN / getStateCodeFromName).
+ *
+ * Returns undefined when either code is missing, i.e. when there isn't
+ * enough information to decide - callers should leave the existing tax
+ * selection untouched in that case rather than guessing.
+ */
+export function resolveGSTTaxFamily(
+  companyStateCode?: string,
+  partyStateCode?: string
+): 'GST' | 'IGST' | undefined {
+  if (!companyStateCode || !partyStateCode) {
+    return undefined;
+  }
+
+  return companyStateCode === partyStateCode ? 'GST' : 'IGST';
 }
 
 /**

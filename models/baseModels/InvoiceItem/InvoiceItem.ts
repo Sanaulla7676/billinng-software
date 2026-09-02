@@ -26,7 +26,12 @@ import {
   getItemVisibility,
 } from 'models/helpers';
 import { SalesInvoice } from '../SalesInvoice/SalesInvoice';
-import { resolveGSTTaxFamily, remapTaxToFamily } from 'regional/in';
+import {
+  resolveGSTTaxFamily,
+  remapTaxToFamily,
+  getStateCodeFromGSTIN,
+  getStateCodeFromName,
+} from 'regional/in';
 import { getSuggestedBatchName } from 'models/inventory/helpers';
 import { ValuationMethod } from 'models/inventory/types';
 import {
@@ -145,38 +150,94 @@ export abstract class InvoiceItem extends Doc {
   /**
    * Rewrites a GST/IGST tax template to match whether this transaction
    * is intra-state (CGST + SGST) or inter-state (IGST), based on the
-   * company's GSTIN vs the party's GSTIN - so a single invoice can't end
+   * company's state vs the party's state - so a single invoice can't end
    * up with a mix of CGST/SGST and IGST rows across its line items.
    *
    * Returns undefined (leaving the original tax as-is) whenever either
-   * GSTIN is missing or the tax template isn't a standard GST/IGST name,
-   * since there isn't enough information to safely rewrite it.
+   * side's state can't be determined or the tax template isn't a
+   * standard GST/IGST name, since there isn't enough information to
+   * safely rewrite it.
    */
   async getStateAdjustedTax(taxName: string): Promise<string | undefined> {
     if (!this.party) {
       return undefined;
     }
 
-    const companyGSTIN = this.fyo.singles.AccountingSettings?.gstin as
-      | string
-      | undefined;
+    const companyStateCode = await this.getCompanyStateCode();
+    const partyStateCode = await this.getPartyStateCode(this.party as string);
 
-    if (!companyGSTIN) {
-      return undefined;
-    }
-
-    const partyGSTIN = (await this.fyo.getValue(
-      'Party',
-      this.party as string,
-      'gstin'
-    )) as string | undefined;
-
-    const family = resolveGSTTaxFamily(companyGSTIN, partyGSTIN);
+    const family = resolveGSTTaxFamily(companyStateCode, partyStateCode);
     if (!family) {
       return undefined;
     }
 
     return remapTaxToFamily(taxName, family);
+  }
+
+  /**
+   * Resolves the company's GST state code, preferring its GSTIN (exact)
+   * and falling back to the state on its registered address - covers
+   * setups where the company GSTIN hasn't been entered yet.
+   */
+  async getCompanyStateCode(): Promise<string | undefined> {
+    const companyGSTIN = this.fyo.singles.AccountingSettings?.gstin as
+      | string
+      | undefined;
+
+    const fromGSTIN = getStateCodeFromGSTIN(companyGSTIN);
+    if (fromGSTIN) {
+      return fromGSTIN;
+    }
+
+    const addressName = this.fyo.singles.PrintSettings?.address as
+      | string
+      | undefined;
+    if (!addressName) {
+      return undefined;
+    }
+
+    const stateName = (await this.fyo.getValue(
+      'Address',
+      addressName,
+      'state'
+    )) as string | undefined;
+
+    return getStateCodeFromName(stateName);
+  }
+
+  /**
+   * Resolves a party's GST state code, preferring their GSTIN (exact) and
+   * falling back to the state on their registered address - covers
+   * unregistered/consumer parties who don't have a GSTIN at all.
+   */
+  async getPartyStateCode(party: string): Promise<string | undefined> {
+    const partyGSTIN = (await this.fyo.getValue(
+      'Party',
+      party,
+      'gstin'
+    )) as string | undefined;
+
+    const fromGSTIN = getStateCodeFromGSTIN(partyGSTIN);
+    if (fromGSTIN) {
+      return fromGSTIN;
+    }
+
+    const addressName = (await this.fyo.getValue(
+      'Party',
+      party,
+      'address'
+    )) as string | undefined;
+    if (!addressName) {
+      return undefined;
+    }
+
+    const stateName = (await this.fyo.getValue(
+      'Address',
+      addressName,
+      'state'
+    )) as string | undefined;
+
+    return getStateCodeFromName(stateName);
   }
 
   async getTotalTaxRate(): Promise<number> {
