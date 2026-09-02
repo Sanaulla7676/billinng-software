@@ -26,6 +26,7 @@ import {
   getItemVisibility,
 } from 'models/helpers';
 import { SalesInvoice } from '../SalesInvoice/SalesInvoice';
+import { resolveGSTTaxFamily, remapTaxToFamily } from 'regional/in';
 import { getSuggestedBatchName } from 'models/inventory/helpers';
 import { ValuationMethod } from 'models/inventory/types';
 import {
@@ -139,6 +140,43 @@ export abstract class InvoiceItem extends Doc {
         }
       }
     }
+  }
+
+  /**
+   * Rewrites a GST/IGST tax template to match whether this transaction
+   * is intra-state (CGST + SGST) or inter-state (IGST), based on the
+   * company's GSTIN vs the party's GSTIN - so a single invoice can't end
+   * up with a mix of CGST/SGST and IGST rows across its line items.
+   *
+   * Returns undefined (leaving the original tax as-is) whenever either
+   * GSTIN is missing or the tax template isn't a standard GST/IGST name,
+   * since there isn't enough information to safely rewrite it.
+   */
+  async getStateAdjustedTax(taxName: string): Promise<string | undefined> {
+    if (!this.party) {
+      return undefined;
+    }
+
+    const companyGSTIN = this.fyo.singles.AccountingSettings?.gstin as
+      | string
+      | undefined;
+
+    if (!companyGSTIN) {
+      return undefined;
+    }
+
+    const partyGSTIN = (await this.fyo.getValue(
+      'Party',
+      this.party as string,
+      'gstin'
+    )) as string | undefined;
+
+    const family = resolveGSTTaxFamily(companyGSTIN, partyGSTIN);
+    if (!family) {
+      return undefined;
+    }
+
+    return remapTaxToFamily(taxName, family);
   }
 
   async getTotalTaxRate(): Promise<number> {
@@ -365,31 +403,37 @@ export abstract class InvoiceItem extends Doc {
     },
     tax: {
       formula: async () => {
-        const itemTax = (await this.fyo.getValue(
+        let taxName = (await this.fyo.getValue(
           'Item',
           this.item as string,
           'tax'
         )) as string;
 
-        if (itemTax) {
-          return itemTax;
+        if (!taxName) {
+          const itemGroup = (await this.fyo.getValue(
+            'Item',
+            this.item as string,
+            'itemGroup'
+          )) as string;
+
+          if (!itemGroup) {
+            return '';
+          }
+
+          const itemGroupDoc = await this.fyo.doc.getDoc(
+            'ItemGroup',
+            itemGroup
+          );
+          taxName = itemGroupDoc?.tax as string;
         }
 
-        const itemGroup = (await this.fyo.getValue(
-          'Item',
-          this.item as string,
-          'itemGroup'
-        )) as string;
-
-        if (!itemGroup) {
+        if (!taxName) {
           return '';
         }
 
-        const itemGroupDoc = await this.fyo.doc.getDoc('ItemGroup', itemGroup);
-
-        return itemGroupDoc?.tax as string;
+        return (await this.getStateAdjustedTax(taxName)) ?? taxName;
       },
-      dependsOn: ['item'],
+      dependsOn: ['item', 'party'],
     },
     amount: {
       formula: () => (this.rate as Money).mul(this.quantity as number),

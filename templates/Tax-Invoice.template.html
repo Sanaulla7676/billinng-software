@@ -66,16 +66,42 @@ body { margin: 0; color: #000; background: #fff; font-family: Arial, sans-serif;
   <table class="items"><thead><tr><th class="sl">Sl<br>No.</th><th class="desc">Description of Goods</th><th class="hsn">HSN/SAC</th><th class="qty">Quantity</th><th class="rate">Rate</th><th class="amount">Amount</th></tr></thead>
   <tbody>
     <tr v-for="(row, idx) in doc.items" :key="row.name || idx"><td class="center">{{ idx + 1 }}</td><td class="left"><span class="bold">{{ row.item }}</span><div v-if="doc.description && row.description" class="tiny">{{ row.description }}</div></td><td class="center">{{ row.hsnCode || '' }}</td><td class="right nowrap"><span class="bold">{{ row.qty }}</span> {{ row.transferUnit || row.unit || 'Nos' }}</td><td class="right nowrap">{{ row.rate }}</td><td class="right nowrap bold">{{ row.amount }}</td></tr>
-    <tr v-for="tax in doc.taxes" :key="tax.name"><td></td><td class="right"><span class="bold">{{ tax.account }}</span></td><td></td><td></td><td></td><td class="right bold nowrap">{{ tax.amount }}</td></tr>
+    <tr v-for="tax in doc.taxes" :key="tax.name"><td></td><td class="right"><span class="bold">{{ tax.account }} Output-{{ tax.rate }}%</span></td><td></td><td></td><td></td><td class="right bold nowrap">{{ tax.amount }}</td></tr>
     <tr><td></td><td class="right bold">Total</td><td></td><td class="right bold nowrap">{{ doc.totalQty || '' }} Nos</td><td></td><td class="right bold nowrap">{{ doc.grandTotal }}</td></tr>
   </tbody></table>
   <div class="words" style="border-bottom:1px solid #000;"><span class="tiny">Amount Chargeable (in words)</span><br><span class="bold">INR {{ doc.grandTotalInWords }}</span><span class="bold" style="float:right;font-size:7px;">E. & O.E</span></div>
-  <table class="summary"><thead><tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Integrated Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr><tr><th>Rate</th><th>Amount</th></tr></thead>
-  <tbody>
-    <tr v-for="tax in doc.taxes" :key="tax.name"><td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td class="center">{{ tax.rate || '' }}</td><td class="right">{{ tax.amount }}</td><td class="right">{{ tax.amount }}</td></tr>
-    <tr v-if="!doc.taxes || !doc.taxes.length"><td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td><td class="right">{{ doc.subTotal || doc.netTotal }}</td><td></td><td></td><td></td></tr>
-    <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
-  </tbody></table>
+  <table class="summary">
+    <thead v-if="doc.hasIGST">
+      <tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Integrated Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr>
+      <tr><th>Rate</th><th>Amount</th></tr>
+    </thead>
+    <thead v-else>
+      <tr><th rowspan="2">HSN/SAC</th><th rowspan="2">Taxable<br>Value</th><th colspan="2">Central Tax</th><th colspan="2">State Tax</th><th rowspan="2">Total<br>Tax Amount</th></tr>
+      <tr><th>Rate</th><th>Amount</th><th>Rate</th><th>Amount</th></tr>
+    </thead>
+    <tbody v-if="doc.hasIGST">
+      <tr>
+        <td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td>
+        <td class="right">{{ doc.subTotal || doc.netTotal }}</td>
+        <td class="center">{{ doc.igstTax ? doc.igstTax.rate + '%' : '' }}</td>
+        <td class="right">{{ doc.igstTax ? doc.igstTax.amount : '' }}</td>
+        <td class="right">{{ doc.totalTax || '' }}</td>
+      </tr>
+      <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
+    </tbody>
+    <tbody v-else>
+      <tr>
+        <td class="center">{{ doc.items && doc.items[0] ? doc.items[0].hsnCode : '' }}</td>
+        <td class="right">{{ doc.subTotal || doc.netTotal }}</td>
+        <td class="center">{{ doc.cgstTax ? doc.cgstTax.rate + '%' : '' }}</td>
+        <td class="right">{{ doc.cgstTax ? doc.cgstTax.amount : '' }}</td>
+        <td class="center">{{ doc.sgstTax ? doc.sgstTax.rate + '%' : '' }}</td>
+        <td class="right">{{ doc.sgstTax ? doc.sgstTax.amount : '' }}</td>
+        <td class="right">{{ doc.totalTax || '' }}</td>
+      </tr>
+      <tr><td class="right bold">Total</td><td class="right bold">{{ doc.subTotal || doc.netTotal }}</td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td><td></td><td></td><td class="right bold">{{ doc.totalTax || '' }}</td></tr>
+    </tbody>
+  </table>
   <div style="padding:4px;border-bottom:1px solid #000;"><span class="tiny">Tax Amount (in words) : </span><span class="bold">INR {{ doc.taxAmountInWords || '' }}</span></div>
   <table class="footer"><tr><td style="width:50%;"><div class="bold" style="text-decoration:underline;">Declaration</div><div class="tiny" style="margin-top:3px;">We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.</div></td><td style="width:50%;"><div class="bold" style="text-decoration:underline;">Company's Bank Details</div><div class="tiny">Bank Name : <span class="bold">{{ print.bankName || '' }}</span></div><div class="tiny">A/c No. : <span class="bold">{{ print.accountNo || '' }}</span></div><div class="tiny">Branch & IFS Code : <span class="bold">{{ print.ifscCode || '' }}</span></div><div class="signature">for {{ print.companyName }}<br><br>Authorised Signatory</div></td></tr></table>
   <div class="center tiny" style="padding:3px;">This is a Computer Generated Invoice</div>

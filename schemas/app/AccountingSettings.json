@@ -29,6 +29,18 @@
       "section": "Default"
     },
     {
+      "label": "Bank Account No.",
+      "fieldname": "accountNo",
+      "fieldtype": "Data",
+      "section": "Default"
+    },
+    {
+      "label": "Branch & IFSC Code",
+      "fieldname": "ifscCode",
+      "fieldtype": "Data",
+      "section": "Default"
+    },
+    {
       "label": "Country",
       "fieldname": "country",
       "fieldtype": "AutoComplete",
@@ -190,6 +202,9 @@
     "email",
     "companyName",
     "country",
+    "bankName",
+    "accountNo",
+    "ifscCode",
     "fiscalYearStart",
     "fiscalYearEnd"
   ]

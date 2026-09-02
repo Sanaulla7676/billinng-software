@@ -42,11 +42,16 @@ const printSettingsFields = [
   'amountInWords',
   'displaytermsandconditions',
   'termsAndConditions',
+];
+const accountingSettingsFields = [
+  'gstin',
+  'taxId',
+  'stateName',
+  'stateCode',
   'bankName',
   'accountNo',
   'ifscCode',
 ];
-const accountingSettingsFields = ['gstin', 'taxId', 'stateName', 'stateCode'];
 
 export function getStateNameAndCode(
   gstin?: string,
@@ -206,6 +211,25 @@ export async function getPrintTemplatePropValues(
       totalTax,
       ModelNameEnum.Currency
     );
+  }
+
+  /**
+   * GST tax breakup used by the tax summary table: a transaction is
+   * either intra-state (CGST + SGST) or inter-state (IGST), never both,
+   * so the print template picks its column layout off `hasIGST` rather
+   * than assuming one or the other.
+   */
+  const taxRows = (values.doc as PrintTemplateData).taxes as
+    | { account?: string }[]
+    | undefined;
+  if (Array.isArray(taxRows)) {
+    const findTax = (accountName: string) =>
+      taxRows.find((row) => row.account === accountName);
+
+    (values.doc as PrintTemplateData).igstTax = findTax('IGST');
+    (values.doc as PrintTemplateData).cgstTax = findTax('CGST');
+    (values.doc as PrintTemplateData).sgstTax = findTax('SGST');
+    (values.doc as PrintTemplateData).hasIGST = !!findTax('IGST');
   }
 
   if (Array.isArray(doc.items)) {
