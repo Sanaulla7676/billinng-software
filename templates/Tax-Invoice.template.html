@@ -34,15 +34,20 @@
 
 .invoice .top-grid {
   border-bottom: 1px solid #000000;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .invoice .left-party-pane {
   width: 55%;
   border-right: 1px solid #000000;
+  vertical-align: top;
 }
 
 .invoice .right-meta-pane {
   width: 45%;
+  vertical-align: top;
+  padding: 0;
 }
 
 .invoice .seller-details,
@@ -77,7 +82,9 @@
 
 .invoice .meta-table {
   width: 100%;
+  height: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .invoice .meta-table td {
@@ -86,6 +93,7 @@
   padding: 2.5px 5px;
   font-size: 10px;
   width: 50%;
+  vertical-align: top;
 }
 
 .invoice .meta-table td:last-child {
@@ -94,7 +102,7 @@
 
 .invoice .meta-table tr:last-child td {
   border-bottom: none;
-  height: 55px;
+  height: auto;
 }
 
 .invoice .meta-label {
@@ -313,8 +321,8 @@ Karnataka, 583227</div>
           </div>
         </td>
 
-        <td class="right-meta-pane">
-          <table class="meta-table">
+        <td class="right-meta-pane" style="height: 1px;">
+          <table class="meta-table" style="height: 100%;">
             <tr>
               <td>
                 <span class="meta-label">Invoice No.</span>
@@ -337,7 +345,7 @@ Karnataka, 583227</div>
             </tr>
             <tr>
               <td>
-                <span class="meta-label">Reference No. & Date.</span>
+                <span class="meta-label">Reference No. &amp; Date.</span>
                 {{ doc.referenceNo || '' }}
               </td>
               <td>
@@ -375,8 +383,8 @@ Karnataka, 583227</div>
                 {{ doc.destination || '' }}
               </td>
             </tr>
-            <tr>
-              <td colspan="2">
+            <tr style="height: 100%;">
+              <td colspan="2" style="vertical-align: top;">
                 <span class="meta-label">Terms of Delivery</span>
                 {{ doc.termsOfDelivery || '' }}
               </td>
